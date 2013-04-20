@@ -33,7 +33,7 @@ public class TreeLoaderTest {
 		Assert.assertTrue(nodeMapView.size() > 25);
 
 		EmailTreeManager emailTreeManager = new EmailTreeManager();
-		emailTreeManager.dump(tree, "/home/ngerakines/tmp/");
+		emailTreeManager.dump(tree, "/home/ngerakines/tmp/foo.data");
 	}
 
 }

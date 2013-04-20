@@ -4,7 +4,10 @@ import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.*;
 
 /**
@@ -76,12 +79,25 @@ public class EmailTreeManager {
 			fileNode.setChildrenPositions(childPositions);
 		}
 
-		for (final String key : keys) {
-			final FileNode fileNode = fileNodes.get(key);
-			if (fileNode == null) {
-				throw new RuntimeException();
+		int count = 0;
+		try {
+			final OutputStream outputStream = new FileOutputStream(path);
+			for (final String key : keys) {
+				final FileNode fileNode = fileNodes.get(key);
+				if (fileNode == null) {
+					throw new RuntimeException();
+				}
+				byte[] bytes = fileNode.serialize();
+				outputStream.write(bytes);
+				if (count++ % 25 == 0) {
+					LOGGER.info("Writing {} to position {} with parent at {} and children at {}", fileNode.getKey(), fileNode.getPosition(), fileNode.getParentPosition(), fileNode.getChildrenPositions());
+				}
 			}
-			LOGGER.info("Writing {} to position {} with parent at {} and children at {}", fileNode.getKey(), fileNode.getPosition(), fileNode.getParentPosition(), fileNode.getChildrenPositions());
+			outputStream.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
