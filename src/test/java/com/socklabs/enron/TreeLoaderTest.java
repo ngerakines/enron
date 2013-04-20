@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +25,12 @@ public class TreeLoaderTest {
 		final TreeLoader treeLoader = new TreeLoader(tree);
 		treeLoader.load("/home/ngerakines/projects/enron/data");
 		Assert.assertNotNull(tree);
+		Map<String, List<String>> mapView = tree.asMap();
+		// NKG: Big assumption, whatever sample data being used has more than 25 words that can be indexed.
+		Assert.assertTrue(mapView.size() > 25);
+
+		EmailTreeManager emailTreeManager = new EmailTreeManager();
+		emailTreeManager.dump(tree, "/home/ngerakines/tmp/");
 	}
 
 }

@@ -1,11 +1,12 @@
 package com.socklabs.enron;
 
 import com.google.common.base.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EmailTree<T> {
 
@@ -52,20 +53,41 @@ public class EmailTree<T> {
 			// NKG: If we aren't at max, then we didn't find an exact match and need to go up parent chain to add the node.
 			if (i < key.length()) {
 				while (i < key.length()) {
-					node = node.addChild(key.charAt(i++));
+					node = node.addChild(key.charAt(i++), key.subSequence(0, i).toString());
 				}
 			}
 		}
 		return Optional.of(node);
 	}
 
+	public Map<String, T> asMap() {
+		final Map<String, T> mapView = new HashMap<String, T>();
+		final Stack<Node<T>> stack = new Stack<Node<T>>();
+		stack.add(root);
+		while (!stack.empty()) {
+			final Node<T> node = stack.pop();
+			final Optional<T> value = node.getValue();
+			final Optional<String> fullKey = node.getFullKey();
+			if (fullKey.isPresent() && value.isPresent()) {
+				mapView.put(fullKey.get(), value.get());
+			}
+			Map<Character, Node<T>> children = node.getChildren();
+			for (final Map.Entry<Character, Node<T>> entry : children.entrySet()) {
+				stack.add(entry.getValue());
+			}
+		}
+		return mapView;
+	}
+
 	public static class Node<T> {
+		private Optional<String> fullKey;
 		private Optional<Character> key;
 		private Optional<T> value;
 		private Optional<Node<T>> parent;
 		private final Map<Character, Node<T>> children = new HashMap<Character, Node<T>>();
 
 		public Node() {
+			this.fullKey = Optional.absent();
 			this.key = Optional.absent();
 			this.value = Optional.absent();
 			this.parent = Optional.absent();
@@ -83,8 +105,16 @@ public class EmailTree<T> {
 			this.parent = Optional.of(node);
 		}
 
+		public void setFullKey(@Nonnull final String fullKey) {
+			this.fullKey = Optional.of(fullKey);
+		}
+
 		public Optional<Character> getKey() {
 			return key;
+		}
+
+		public Optional<String> getFullKey() {
+			return fullKey;
 		}
 
 		public Optional<T> getValue() {
@@ -107,8 +137,9 @@ public class EmailTree<T> {
 			return Optional.absent();
 		}
 
-		public Node<T> addChild(final char key) {
+		public Node<T> addChild(final char key, final String fullKey) {
 			final Node<T> emptyNode = new Node<T>();
+			emptyNode.setFullKey(fullKey);
 			children.put(key, emptyNode);
 			return emptyNode;
 		}

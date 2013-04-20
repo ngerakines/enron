@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class TreeLoader {
@@ -28,7 +29,7 @@ public class TreeLoader {
 		try {
 			files = walk(path);
 			for (final String file : files) {
-				LOGGER.info("FOUND {}", file);
+				// LOGGER.info("FOUND {}", file);
 				index(file);
 			}
 		} catch (IOException e) {
@@ -66,7 +67,7 @@ public class TreeLoader {
 				}
 				lineCount++;
 			}
-			LOGGER.info("file {} had {} lines", path, lineCount);
+			// LOGGER.info("file {} had {} lines", path, lineCount);
 			reader.close();
 		} catch (IOException e) {
 			LOGGER.error("Could not open file " + fileName, e);

@@ -28,7 +28,7 @@ public class FileVisitor extends SimpleFileVisitor<Path> {
 	}
 
 	public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-		LOGGER.info("Visiting {}", file);
+		// LOGGER.info("Visiting {}", file);
 		if (!file.toString().contains("_")) {
 			paths.add(file.toAbsolutePath().toString());
 		}
