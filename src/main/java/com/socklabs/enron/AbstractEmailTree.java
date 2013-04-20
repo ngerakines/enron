@@ -1,19 +1,18 @@
 package com.socklabs.enron;
 
 import com.google.common.base.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class EmailTree<T> {
+public class AbstractEmailTree<T> {
 
 	private Node<T> root;
 
-	public EmailTree() {
+	public AbstractEmailTree() {
 		this.root = new Node<T>();
+		this.root.setFullKey("");
 	}
 
 	public void setValue(final CharSequence key, final T value) {
@@ -74,6 +73,23 @@ public class EmailTree<T> {
 			Map<Character, Node<T>> children = node.getChildren();
 			for (final Map.Entry<Character, Node<T>> entry : children.entrySet()) {
 				stack.add(entry.getValue());
+			}
+		}
+		return mapView;
+	}
+
+	public Map<String, Node<T>> asNodeMap() {
+		final Map<String, Node<T>> mapView = new HashMap<String, Node<T>>();
+		final Stack<Node<T>> stack = new Stack<Node<T>>();
+		stack.add(root);
+		while (!stack.empty()) {
+			final Node<T> node = stack.pop();
+			if (node.getFullKey().isPresent()) {
+				mapView.put(node.getFullKey().get(), node);
+				Map<Character, Node<T>> children = node.getChildren();
+				for (final Map.Entry<Character, Node<T>> entry : children.entrySet()) {
+					stack.add(entry.getValue());
+				}
 			}
 		}
 		return mapView;

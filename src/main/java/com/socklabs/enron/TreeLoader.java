@@ -9,7 +9,6 @@ import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 public class TreeLoader {
@@ -17,9 +16,9 @@ public class TreeLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TreeLoader.class);
 	private static final Charset charset = Charset.forName("UTF-8");
 
-	private final EmailTree<List<String>> emailTree;
+	private final DefaultEmailTree emailTree;
 
-	public TreeLoader(final EmailTree<List<String>> emailTree) {
+	public TreeLoader(final DefaultEmailTree emailTree) {
 		this.emailTree = emailTree;
 	}
 
@@ -50,7 +49,6 @@ public class TreeLoader {
 		try {
 			final BufferedReader reader = Files.newBufferedReader(path, charset);
 			String line = null;
-			int lineCount = 0;
 			boolean firstEmpty = false;
 			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("Message-ID:")) {
@@ -62,12 +60,10 @@ public class TreeLoader {
 				if (firstEmpty) {
 					final List<String> words = parseWords(line);
 					for (final String word : words) {
-						emailTree.setValue(word, Arrays.asList(messageId));
+						emailTree.appendValue(word, messageId);
 					}
 				}
-				lineCount++;
 			}
-			// LOGGER.info("file {} had {} lines", path, lineCount);
 			reader.close();
 		} catch (IOException e) {
 			LOGGER.error("Could not open file " + fileName, e);

@@ -21,13 +21,16 @@ public class TreeLoaderTest {
 
 	@Test
 	public void load() {
-		final EmailTree<List<String>> tree = new EmailTree<List<String>>();
+		final DefaultEmailTree tree = new DefaultEmailTree();
 		final TreeLoader treeLoader = new TreeLoader(tree);
 		treeLoader.load("/home/ngerakines/projects/enron/data");
 		Assert.assertNotNull(tree);
 		Map<String, List<String>> mapView = tree.asMap();
 		// NKG: Big assumption, whatever sample data being used has more than 25 words that can be indexed.
 		Assert.assertTrue(mapView.size() > 25);
+
+		Map<String, AbstractEmailTree.Node<List<String>>> nodeMapView = tree.asNodeMap();
+		Assert.assertTrue(nodeMapView.size() > 25);
 
 		EmailTreeManager emailTreeManager = new EmailTreeManager();
 		emailTreeManager.dump(tree, "/home/ngerakines/tmp/");
