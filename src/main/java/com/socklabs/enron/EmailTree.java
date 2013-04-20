@@ -15,34 +15,51 @@ public class EmailTree<T> {
 		this.root = new Node<T>();
 	}
 
-	public void add(CharSequence str, final T value) {
+	public void setValue(final CharSequence key, final T value) {
+		final Optional<Node<T>> nodeOptional = getNode(key, true);
+		if (nodeOptional.isPresent()) {
+			final Node<T> node = nodeOptional.get();
+			node.setValue(value);
+			return;
+		}
+		throw new RuntimeException("Could not find or create node for sequence " + key.toString());
+	}
+
+	public Optional<T> getValue(final CharSequence key) {
+		final Optional<Node<T>> nodeOptional = getNode(key, false);
+		if (nodeOptional.isPresent()) {
+			return nodeOptional.get().getValue();
+		}
+		return Optional.absent();
+	}
+
+	public Optional<Node<T>> getNode(final CharSequence key, final boolean createIfMissing) {
 		Node<T> node = root;
-		Node<T> previousNode = null;
+		Node<T> lastNode = null;
 		int i = 0;
-		while (i < str.length()) {
-			previousNode = node;
-			final Optional<Node<T>> optionalNode = node.getChildren(str.charAt(i));
+		// NKG: Traverse down to find the deepest node that could match.
+		while (i < key.length()) {
+			lastNode = node;
+			final Optional<Node<T>> optionalNode = node.getChildren(key.charAt(i));
 			if (!optionalNode.isPresent()) {
 				break;
+			} else {
+				node = optionalNode.get();
 			}
 			i++;
 		}
-
-		if (i < str.length()) {
-			node = previousNode;
-			while (i < str.length()) {
-				if (node != null) {
-					node = node.addChild(str.charAt(i++));
+		if (createIfMissing) {
+			// NKG: If we aren't at max, then we didn't find an exact match and need to go up parent chain to add the node.
+			if (i < key.length()) {
+				while (i < key.length()) {
+					node = node.addChild(key.charAt(i++));
 				}
 			}
 		}
-		if (node != null) {
-			node.setValue(value);
-		}
-
+		return Optional.of(node);
 	}
 
-	private static class Node<T> {
+	public static class Node<T> {
 		private Optional<Character> key;
 		private Optional<T> value;
 		private Optional<Node<T>> parent;
