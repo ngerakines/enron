@@ -82,6 +82,15 @@ public class EmailTreeManager {
 		int count = 0;
 		try {
 			final OutputStream outputStream = new FileOutputStream(path);
+
+			final FileNode rootFileNode = fileNodes.get("");
+			if (rootFileNode == null) {
+				throw new RuntimeException();
+			}
+			ByteBuffer rootPositionByteBuffer = ByteBuffer.allocate(Integer.SIZE);
+			rootPositionByteBuffer.putInt(rootFileNode.getPosition());
+			outputStream.write(rootPositionByteBuffer.array());
+
 			for (final String key : keys) {
 				final FileNode fileNode = fileNodes.get(key);
 				if (fileNode == null) {
@@ -108,7 +117,26 @@ public class EmailTreeManager {
 	}
 
 	public List<String> search(final String word, final String file) {
+
+		try {
+			final InputStream inputStream = new FileInputStream(file);
+			byte[] rootPositionBytes = new byte[Integer.SIZE];
+			inputStream.read(rootPositionBytes);
+			ByteBuffer rootPositionByteBuffer = ByteBuffer.wrap(rootPositionBytes);
+			final int rootPosition = rootPositionByteBuffer.getInt();
+
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		return new ArrayList<String>();
+	}
+
+	private Optional<FileNode> getNodeFromStream(final InputStream inputStream, final int position) {
+		return Optional.absent();
 	}
 
 	private static class FileNode {
